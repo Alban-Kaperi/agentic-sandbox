@@ -1,0 +1,1 @@
+Read and follow `AGENTS.md` at the repository root. It contains the commands, the code map, the ticket workflow, the environment contract between `src/config.ts` and `k8s/configmap.yaml`, and the definition of done. Path-specific rules are in `.github/instructions/`.

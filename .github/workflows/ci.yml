@@ -1,0 +1,150 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: sandbox-app
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  test:
+    name: lint, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  deploy-kind:
+    name: deploy to ephemeral kind cluster
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build image
+        run: docker build -t "$IMAGE:$IMAGE_TAG" .
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: sandbox
+          wait: 120s
+
+      - name: Load image into cluster
+        run: kind load docker-image "$IMAGE:$IMAGE_TAG" --name sandbox
+
+      - name: Deploy
+        run: |
+          sed -i "s|image: $IMAGE:dev|image: $IMAGE:$IMAGE_TAG|" k8s/deployment.yaml
+          kubectl apply -k k8s/
+
+      - name: Wait for rollout
+        id: rollout
+        continue-on-error: true
+        run: kubectl rollout status deployment/sandbox-app --timeout=120s
+
+      - name: Smoke test
+        id: smoke
+        if: steps.rollout.outcome == 'success'
+        continue-on-error: true
+        run: |
+          kubectl port-forward service/sandbox-app 3000:80 >/tmp/pf.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://localhost:3000/health >/tmp/health.json; then break; fi
+            sleep 1
+          done
+          echo "health: $(cat /tmp/health.json)"
+          grep -q '"status":"ok"' /tmp/health.json
+
+      - name: Browser check (Playwright, no vision)
+        id: e2e
+        if: steps.smoke.outcome == 'success'
+        continue-on-error: true
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          BASE_URL=http://localhost:3000 npx playwright test
+
+      - name: Collect cluster diagnostics
+        if: always()
+        run: |
+          mkdir -p diag
+          kubectl get pods -o wide > diag/pods.txt 2>&1 || true
+          kubectl get events --sort-by=.lastTimestamp > diag/events.txt 2>&1 || true
+          kubectl describe deployment/sandbox-app > diag/deployment.txt 2>&1 || true
+          for p in $(kubectl get pods -l app=sandbox-app -o name); do
+            n=${p#pod/}
+            kubectl describe "$p" > "diag/describe-$n.txt" 2>&1 || true
+            kubectl logs "$p" --all-containers > "diag/logs-$n.txt" 2>&1 || true
+            kubectl logs "$p" --all-containers --previous > "diag/logs-previous-$n.txt" 2>&1 || true
+          done
+          kubectl get pods -l app=sandbox-app -o json > diag/pods.json 2>/dev/null || echo '{"items":[]}' > diag/pods.json
+          kubectl get events -o json > diag/events.json 2>/dev/null || echo '{"items":[]}' > diag/events.json
+          node scripts/build-snapshot.mjs diag > diag/snapshot.json
+          {
+            echo "## Deploy result"
+            echo ""
+            echo "| step | outcome |"
+            echo "|---|---|"
+            echo "| rollout | ${{ steps.rollout.outcome }} |"
+            echo "| smoke | ${{ steps.smoke.outcome }} |"
+            echo "| browser | ${{ steps.e2e.outcome }} |"
+            echo ""
+            echo "## Pods"
+            echo '```'
+            cat diag/pods.txt
+            echo '```'
+            echo "## Events (last 30)"
+            echo '```'
+            tail -n 30 diag/events.txt
+            echo '```'
+            for f in diag/logs-*.txt; do
+              [ -s "$f" ] || continue
+              echo "## $(basename "$f" .txt)"
+              echo '```'
+              tail -n 60 "$f"
+              echo '```'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload cluster snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cluster-snapshot
+          path: diag/
+          retention-days: 7
+
+      - name: Upload Playwright report
+        if: always() && steps.e2e.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Fail if deploy, smoke or browser check failed
+        if: steps.rollout.outcome != 'success' || steps.smoke.outcome != 'success' || steps.e2e.outcome != 'success'
+        run: |
+          echo "rollout=${{ steps.rollout.outcome }} smoke=${{ steps.smoke.outcome }} browser=${{ steps.e2e.outcome }}"
+          echo "Read the job summary and the cluster-snapshot artifact for pod logs and events."
+          exit 1

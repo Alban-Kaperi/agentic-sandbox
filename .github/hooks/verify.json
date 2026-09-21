@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "matcher": "edit",
+        "bash": "./scripts/hooks/after-edit.sh",
+        "timeoutSec": 90
+      }
+    ],
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/session-start.sh",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

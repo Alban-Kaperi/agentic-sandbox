@@ -1,0 +1,1 @@
+Read `AGENTS.md` first. It is the canonical instruction file for this repository; this file only points to it. Path-specific rules are in `.github/instructions/`, skills in `.github/skills/`, agents in `.github/agents/`.

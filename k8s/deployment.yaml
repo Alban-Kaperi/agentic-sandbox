@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sandbox-app
+  labels:
+    app: sandbox-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sandbox-app
+  template:
+    metadata:
+      labels:
+        app: sandbox-app
+    spec:
+      containers:
+        - name: app
+          image: sandbox-app:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: sandbox-app-config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--image-responses", "omit"]
+    },
+    "cluster-snapshot": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["tools/cluster-snapshot-mcp/index.mjs"],
+      "env": { "SNAPSHOT_PATH": "${workspaceFolder}/diag/snapshot.json" }
+    }
+  }
+}

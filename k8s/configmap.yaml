@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sandbox-app-config
+data:
+  APP_REGION: "eu"
+  LOG_LEVEL: "info"
+  METRICS_ENABLED: "false"
