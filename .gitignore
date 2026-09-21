@@ -6,3 +6,4 @@ playwright-report/
 snapshot.json
 .env
 .DS_Store
+scoreboard/
