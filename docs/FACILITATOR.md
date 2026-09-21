@@ -2,15 +2,14 @@
 
 ## Where the participants' repositories live
 
-Decide this first. It depends on how the customer's GitHub accounts are set up.
+Default: **one repository, every participant forks it.** You maintain one repo, each fork is a private working copy with its own pipeline runs and minutes.
 
-| Option | When | How |
-|---|---|---|
-| **A · Import into the customer's GitHub organisation** (recommended) | Always when the customer uses Enterprise Managed Users (EMU): those accounts cannot access repositories outside their enterprise. Also when the cloud agent should run under the customer's policies. | Someone with org rights imports this repository (GitHub "Import repository" or push a mirror), marks it as template, then runs `scripts/create-group-repos.sh <org> <count> <org>/agentic-sandbox`. Actions minutes are the customer's. |
-| **B · Group repos under your account** | Customer accounts can join outside repositories, small group, you want full control. | `scripts/create-group-repos.sh <you> <count>`, add participants as collaborators. Actions minutes are yours (2,000/month on a free private plan, a full run takes about 2.5). |
-| **C · Forks by participants** | Participants have their own accounts and want to keep the result. | They fork, enable Actions on the fork, and you run `scripts/seed-issues.sh <their>/<fork>` because issues are not forked. Minutes are theirs. |
+- Make the repository public: `gh repo edit <owner>/agentic-sandbox --visibility public --accept-visibility-change-consequences`. Public means anyone can fork without collaborator management, Actions minutes are unlimited in the forks, and the scoreboard can read them.
+- Forks start with Actions disabled; every participant enables them once (README step 3).
+- Issues are not forked. Either Jira is the ticket source (the `work-ticket` skill creates issues in the fork), or participants run `scripts/seed-issues.sh <their fork>`.
+- Groups of three can still work together: each person in their own fork on the same ticket, or one fork per group with the others as collaborators.
 
-Ask the customer: "Do your GitHub accounts have `_<shortcode>` suffixes and can they open public repositories on github.com?" Suffixes mean EMU, and the answer decides between A and B.
+**Check first:** if the customer's GitHub accounts carry a suffix like `_vw`, they are Enterprise Managed Users and cannot fork or even open repositories outside their enterprise. Then import this repository into the customer's organisation (GitHub "Import repository"), and participants fork it there. `scripts/create-group-repos.sh` remains for the case that you prefer repos from a template instead of forks.
 
 ## Jira
 
@@ -25,24 +24,19 @@ The Atlassian MCP has no read-only mode. Participants can only do what their Jir
 
 ## Before the workshop
 
-1. Create one repository per group from this template:
-   ```
-   scripts/create-group-repos.sh <owner> <count>        # e.g. MarDonhauser 6
-   ```
-   The script creates `<owner>/agentic-sandbox-group-01..NN` from the template, enables Actions, and seeds the issues.
-2. Add the participants of each group as collaborators (write access).
-3. Run one pipeline per repo (push an empty commit) so the first kind run is cached and green.
-4. Decide tickets vs Jira: issues are seeded from `docs/tickets/`. If the team wants Jira, create a Jira Cloud Free site and paste the same tickets; the Atlassian MCP works against it.
+1. Make the repository public, send the fork link and the README setup steps to the participants a week ahead.
+2. Ask everyone to complete the setup (fork, Actions enabled, first pipeline green) before the day. The scoreboard shows who did.
+3. Decide tickets vs Jira: issues are seeded from `docs/tickets/`. If the team wants Jira, create a Jira Cloud Free site and paste the same tickets; the Atlassian MCP works against it.
 5. Check the Actions minutes budget: private repos in the free plan have 2,000 minutes per month; a full run takes 4 to 6 minutes. Make the repos public or use the customer's organisation if that is tight.
 6. Dry run: work ticket 0 and ticket 5 yourself in a group repo with the Copilot CLI and with VS Code.
 
 ## Live scoreboard
 
 ```
-while true; do node scripts/scoreboard.mjs <owner>; sleep 60; done
+while true; do node scripts/scoreboard.mjs <owner>/agentic-sandbox; sleep 60; done
 open scoreboard/index.html     # share this browser tab; it refreshes itself every 60 s
 ```
-One row per group, one column per ticket (open, PR open, done) plus the last pipeline result. Optional: a GitHub Project (v2) on the owner account that collects the issues of all group repos as a Kanban board; needs the `project` scope on the gh token.
+One row per fork, one column per ticket (open, PR open, done, matched by issue title) plus the last pipeline result in that fork. Needs the forks to be readable by your token, which public forks are.
 
 ## During the day
 

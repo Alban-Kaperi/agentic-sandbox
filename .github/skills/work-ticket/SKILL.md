@@ -8,6 +8,8 @@ argument-hint: "<JIRA-KEY or #issue-number>"
 
 Input: a Jira key like `WLTP-12` or a GitHub issue like `#5`. Stop at the marked gates unless the user said "unattended".
 
+This repository is usually a fork. Every `gh` command targets the fork, never the upstream repository: run `gh repo set-default` once after cloning, and never pass `--repo` with the upstream name.
+
 ## 1. Intake
 - Jira key: read the ticket with the Atlassian MCP (`getJiraIssue`). Create a GitHub issue in this repository with the same title and body, add the line `Jira: <KEY>` at the top. Comment on the Jira ticket: "Started. GitHub issue #<n>, branch to follow."
 - GitHub issue: read it with `gh issue view <n>`.
@@ -27,7 +29,7 @@ Small commits, one concern each. Follow `.github/instructions/`. Never touch tes
 Run the `verify-change` skill. Fix what it finds. Only then continue.
 
 ## 6. Pull request
-Push the branch. Open a PR with the template: `Closes #<n>` in the ticket section, the Jira key in the title if there is one, the verification block filled, assumptions and open points listed.
+Push the branch to the fork (`git push -u origin <branch>`). Open a PR **in the fork, against its own `main`** (`gh pr create --base main`; if gh asks where to create it, choose the fork) with the template: `Closes #<n>` in the ticket section, the Jira key in the title if there is one, the verification block filled, assumptions and open points listed.
 **Gate:** show the PR link.
 
 ## 7. Pipeline

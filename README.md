@@ -11,10 +11,26 @@ It exists for one purpose: practising an agentic workflow end to end. Ticket, pl
 
 What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists only inside the pipeline run on GitHub's runners. You push, the pipeline deploys, you read the result.
 
+## Setup, once
+
+1. **Fork** this repository on GitHub (your own account).
+2. Clone your fork and make it the target for `gh`:
+   ```
+   git clone https://github.com/<you>/agentic-sandbox.git
+   cd agentic-sandbox
+   gh repo set-default <you>/agentic-sandbox
+   ```
+3. **Enable Actions in your fork:** open the Actions tab of your fork on GitHub and click "I understand my workflows, go ahead and enable them". Forks start with workflows disabled.
+4. Tickets: either the workshop uses Jira (then the `work-ticket` skill creates GitHub issues in your fork as it goes), or seed the tickets as issues yourself: `scripts/seed-issues.sh <you>/agentic-sandbox`. Issues are not copied by forking.
+5. Check: `npm ci && npm run verify`, then push an empty commit and watch the first pipeline run go green:
+   ```
+   git commit --allow-empty -m "pipeline check" && git push
+   gh run watch
+   ```
+
 ## Run it
 
 ```
-npm ci
 npm run dev          # http://localhost:3000
 npm run verify       # lint, unit tests, build
 npm run e2e          # browser tests, server must be running
