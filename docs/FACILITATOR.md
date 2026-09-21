@@ -1,5 +1,28 @@
 # Facilitator guide
 
+## Where the participants' repositories live
+
+Decide this first. It depends on how the customer's GitHub accounts are set up.
+
+| Option | When | How |
+|---|---|---|
+| **A · Import into the customer's GitHub organisation** (recommended) | Always when the customer uses Enterprise Managed Users (EMU): those accounts cannot access repositories outside their enterprise. Also when the cloud agent should run under the customer's policies. | Someone with org rights imports this repository (GitHub "Import repository" or push a mirror), marks it as template, then runs `scripts/create-group-repos.sh <org> <count> <org>/agentic-sandbox`. Actions minutes are the customer's. |
+| **B · Group repos under your account** | Customer accounts can join outside repositories, small group, you want full control. | `scripts/create-group-repos.sh <you> <count>`, add participants as collaborators. Actions minutes are yours (2,000/month on a free private plan, a full run takes about 2.5). |
+| **C · Forks by participants** | Participants have their own accounts and want to keep the result. | They fork, enable Actions on the fork, and you run `scripts/seed-issues.sh <their>/<fork>` because issues are not forked. Minutes are theirs. |
+
+Ask the customer: "Do your GitHub accounts have `_<shortcode>` suffixes and can they open public repositories on github.com?" Suffixes mean EMU, and the answer decides between A and B.
+
+## Jira
+
+The loop can start in Jira and end with a comment there. Set up once:
+
+1. Create a Jira Cloud site (Free plan, up to 10 users) and a project, note the key (for example `WLTP`).
+2. Create an API token for your Atlassian account, then `JIRA_SITE=https://<site>.atlassian.net JIRA_EMAIL=<you> JIRA_TOKEN=<token> JIRA_PROJECT=<KEY> node scripts/seed-jira.mjs` creates the nine tickets.
+3. Participants log in once when the Atlassian MCP asks (OAuth). With the 10-user limit, give each group one Jira account.
+4. Without Jira the same loop runs on GitHub issues alone; the `work-ticket` skill accepts both.
+
+The Atlassian MCP has no read-only mode. Participants can only do what their Jira account can do, so give the accounts comment and transition rights, nothing else.
+
 ## Before the workshop
 
 1. Create one repository per group from this template:

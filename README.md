@@ -4,12 +4,12 @@ A small measurement-run log (vehicles, test cycles, CO2 results) with a JSON API
 
 It exists for one purpose: practising an agentic workflow end to end. Ticket, plan, change, tests, pull request, review, pipeline, deploy, diagnosis. Nothing here is mocked. The cluster is real, it just does not survive the pipeline run.
 
-## Prerequisites
+## What you need on your machine
 
-- Node 22 or newer
-- GitHub Copilot in VS Code, the Copilot CLI, or the Copilot App
-- Optional: Docker, to build the image locally
-- Optional: `gh` CLI, to read pipeline runs and download the cluster snapshot
+- git, Node 22 or newer, and the `gh` CLI
+- GitHub Copilot: the Copilot CLI, VS Code, or the Copilot App
+
+What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists only inside the pipeline run on GitHub's runners. You push, the pipeline deploys, you read the result.
 
 ## Run it
 
@@ -45,7 +45,17 @@ Where to look when it is red:
 - The **`cluster-snapshot` artifact** contains everything as text plus `snapshot.json`. Download with `gh run download <run-id> -n cluster-snapshot -D diag/`.
 - The **`playwright-report` artifact** has the failing step and a screenshot when the browser check failed.
 
-## Working a ticket with an agent
+## The whole loop in one command
+
+```
+copilot
+> use the work-ticket skill for WLTP-5      # or: for #5
+```
+The `work-ticket` skill reads the ticket (Jira via the Atlassian MCP, or a GitHub issue), creates the GitHub issue if needed, branches, plans, stops for your "go", implements, verifies, opens the PR, watches the pipeline, diagnoses and fixes a red deploy, and reports back on the issue and the Jira ticket. It never merges.
+
+The Atlassian MCP asks for an OAuth login on first use. Without Jira, the skill works with GitHub issues alone.
+
+## Working a ticket step by step
 
 1. Pick an issue. Either assign it to Copilot (cloud agent) or start a session locally.
 2. Plan first: ask for the `plan-ticket` skill. The result lands in `plans/<issue>.md`. Read it. Answer the open questions.
