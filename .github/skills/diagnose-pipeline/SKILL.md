@@ -11,11 +11,12 @@ Diagnosis first, fix second. Never change code until you can name the failing st
 
 1. Identify the run: `gh run list --limit 5` then `gh run view <id>`. Note which job failed: `test` or `deploy-kind`.
 2. If `test` failed: `gh run view <id> --log-failed`. The failing assertion or type error is the root cause. Go to step 6.
-3. If `deploy-kind` failed, read the job summary first: it shows the outcome of rollout, smoke, and browser, then pod status, events, and container logs.
+3. If `deploy-kind` failed, read the job summary first: it shows the outcome of rollout, stability, smoke, and browser, then pod status, events, and container logs.
 4. Fetch the snapshot for detail: `gh run download <id> -n cluster-snapshot -D diag/`. Then read `diag/snapshot.json` (or use the `cluster-snapshot` MCP tools: `pods_list`, `pods_describe`, `pods_logs`, `events_list`).
 5. Classify the failure and look at the matching evidence:
-   - `CrashLoopBackOff` or `Error`: container logs, especially `previousLogs`. A startup log with `startup failed: invalid configuration` means the environment contract is broken. Compare `src/config.ts` with `k8s/configmap.yaml`.
+   - `CrashLoopBackOff` or `Error`: container logs. `logs` holds the output of the last terminated container; `previousLogs` the one before that, if still available. A startup log with `startup failed: invalid configuration` means the environment contract is broken. Compare `src/config.ts` with `k8s/configmap.yaml`.
    - `ImagePullBackOff` or `ErrImageNeverPull`: image name or tag in `k8s/deployment.yaml` does not match what the pipeline built and loaded.
+   - Rollout ok but stability failed: the container started and then exited or restarted. Same evidence as CrashLoopBackOff.
    - Pod `Running` but not `Ready`, rollout timeout: readiness probe path or port. The app serves `/health` on 3000.
    - Rollout ok, smoke failed: `/health` did not return `status: ok`. Check the port-forward target and the service port.
    - Smoke ok, browser failed: open the `playwright-report` artifact. Locate the failing step and screenshot.

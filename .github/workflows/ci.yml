@@ -60,11 +60,33 @@ jobs:
       - name: Wait for rollout
         id: rollout
         continue-on-error: true
-        run: kubectl rollout status deployment/sandbox-app --timeout=120s
+        run: kubectl rollout status deployment/sandbox-app --timeout=90s
+
+      - name: Stability check (pods ready, no restarts after 15s)
+        id: stability
+        if: steps.rollout.outcome == 'success'
+        continue-on-error: true
+        run: |
+          sleep 15
+          kubectl get pods -l app=sandbox-app -o wide
+          kubectl get pods -l app=sandbox-app -o json > /tmp/pods.json
+          node -e '
+            const pods = JSON.parse(require("fs").readFileSync("/tmp/pods.json","utf8")).items;
+            const bad = [];
+            for (const p of pods) {
+              for (const c of (p.status.containerStatuses ?? [])) {
+                if (!c.ready) bad.push(`${p.metadata.name}: container ${c.name} not ready (${Object.keys(c.state)[0]}${c.state.waiting?.reason ? ": " + c.state.waiting.reason : ""}${c.state.terminated?.reason ? ": " + c.state.terminated.reason : ""})`);
+                if ((c.restartCount ?? 0) > 0) bad.push(`${p.metadata.name}: container ${c.name} restarted ${c.restartCount}x`);
+              }
+            }
+            if (pods.length === 0) bad.push("no pods found for app=sandbox-app");
+            if (bad.length) { console.error("UNSTABLE:\n" + bad.join("\n")); process.exit(1); }
+            console.log(`stable: ${pods.length} pod(s) ready, no restarts`);
+          '
 
       - name: Smoke test
         id: smoke
-        if: steps.rollout.outcome == 'success'
+        if: steps.stability.outcome == 'success'
         continue-on-error: true
         run: |
           kubectl port-forward service/sandbox-app 3000:80 >/tmp/pf.log 2>&1 &
@@ -106,6 +128,7 @@ jobs:
             echo "| step | outcome |"
             echo "|---|---|"
             echo "| rollout | ${{ steps.rollout.outcome }} |"
+            echo "| stability | ${{ steps.stability.outcome }} |"
             echo "| smoke | ${{ steps.smoke.outcome }} |"
             echo "| browser | ${{ steps.e2e.outcome }} |"
             echo ""
@@ -119,6 +142,7 @@ jobs:
             echo '```'
             for f in diag/logs-*.txt; do
               [ -s "$f" ] || continue
+              grep -q 'unable to retrieve container logs' "$f" && continue
               echo "## $(basename "$f" .txt)"
               echo '```'
               tail -n 60 "$f"
@@ -142,9 +166,9 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-      - name: Fail if deploy, smoke or browser check failed
-        if: steps.rollout.outcome != 'success' || steps.smoke.outcome != 'success' || steps.e2e.outcome != 'success'
+      - name: Fail if deploy, stability, smoke or browser check failed
+        if: steps.rollout.outcome != 'success' || steps.stability.outcome != 'success' || steps.smoke.outcome != 'success' || steps.e2e.outcome != 'success'
         run: |
-          echo "rollout=${{ steps.rollout.outcome }} smoke=${{ steps.smoke.outcome }} browser=${{ steps.e2e.outcome }}"
+          echo "outcomes: rollout=${{ steps.rollout.outcome }} stability=${{ steps.stability.outcome }} smoke=${{ steps.smoke.outcome }} browser=${{ steps.e2e.outcome }}"
           echo "Read the job summary and the cluster-snapshot artifact for pod logs and events."
           exit 1

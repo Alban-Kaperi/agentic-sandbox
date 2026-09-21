@@ -20,7 +20,7 @@ const pods = (json("pods.json").items ?? []).map((p) => {
     image: p.spec?.containers?.[0]?.image,
     describe: read(`describe-${name}.txt`),
     logs: read(`logs-${name}.txt`),
-    previousLogs: read(`logs-previous-${name}.txt`),
+    previousLogs: read(`logs-previous-${name}.txt`).replace(/^unable to retrieve container logs.*$/m, "").trim(),
   };
 });
 

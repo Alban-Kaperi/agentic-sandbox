@@ -37,11 +37,11 @@ Every variable the app reads is declared in `src/config.ts` and provided by `k8s
 `.github/workflows/ci.yml` runs two jobs on every push and pull request:
 
 1. `test`: `npm run lint`, `npm test`, `npm run build`
-2. `deploy-kind`: builds the image, starts a kind cluster in the runner, loads the image, applies `k8s/`, waits for the rollout, runs a smoke test against `/health`, runs the Playwright browser tests against the deployed app, then collects pod status, events, and container logs.
+2. `deploy-kind`: builds the image, starts a kind cluster in the runner, loads the image, applies `k8s/`, waits for the rollout, checks for 15 seconds that every pod stays ready without restarts, runs a smoke test against `/health`, runs the Playwright browser tests against the deployed app, then collects pod status, events, and container logs.
 
 Where to look when it is red:
 
-- The **job summary** (Actions run page, top) shows the outcome of rollout, smoke, and browser plus pods, events, and logs.
+- The **job summary** (Actions run page, top) shows the outcome of rollout, stability, smoke, and browser plus pods, events, and logs.
 - The **`cluster-snapshot` artifact** contains everything as text plus `snapshot.json`. Download with `gh run download <run-id> -n cluster-snapshot -D diag/`.
 - The **`playwright-report` artifact** has the failing step and a screenshot when the browser check failed.
 
