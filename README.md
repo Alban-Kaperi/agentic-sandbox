@@ -24,9 +24,9 @@ What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists 
 4. **Create the tickets as issues in your fork:** `scripts/seed-issues.sh YOUR-LOGIN/agentic-sandbox`. Issues are not copied by forking.
 5. Check: `npm ci && npm run verify && npx playwright install chromium && gh issue view 1 --json title`, then push an empty commit and watch the first pipeline run go green:
    ```
-   git commit --allow-empty -m "pipeline check" && git push
-   gh run watch
+   git commit --allow-empty -m "pipeline check" && git push && sleep 10 && gh run watch
    ```
+   The pause matters: right after the push the new run does not exist yet, and `gh run watch` would offer you an older one.
    `npx playwright install chromium` downloads the browser the e2e tests need (about 100 MB, once). `gh issue view 1` proves that `gh` talks to your fork and is new enough.
 
 ## Run it
