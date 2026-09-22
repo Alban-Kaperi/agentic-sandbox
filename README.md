@@ -16,7 +16,7 @@ What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists 
 1. **Fork** this repository on GitHub (your own account).
 2. Clone your fork and make it the target for `gh` (`YOUR-LOGIN` is your GitHub user name):
    ```
-   git clone https://github.com/YOUR-LOGIN/agentic-sandbox.git
+   gh repo clone YOUR-LOGIN/agentic-sandbox
    cd agentic-sandbox
    gh repo set-default YOUR-LOGIN/agentic-sandbox
    ```
