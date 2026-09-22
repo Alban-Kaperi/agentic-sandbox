@@ -9,7 +9,7 @@ Default: **one repository, every participant forks it.** You maintain one repo, 
 - Issues are not forked. Every participant runs `scripts/seed-issues.sh <their fork>` once; it creates the nine tickets from `docs/tickets/` as issues in the fork.
 - Groups of three can still work together: each person in their own fork on the same ticket, or one fork per group with the others as collaborators.
 
-**Check first:** if the customer's GitHub accounts carry a suffix like `_vw`, they are Enterprise Managed Users and cannot fork or even open repositories outside their enterprise. Then import this repository into the customer's organisation (GitHub "Import repository"), and participants fork it there. `scripts/create-group-repos.sh` remains for the case that you prefer repos from a template instead of forks.
+**Check first:** if the customer's GitHub accounts carry a suffix like `_vw`, they are Enterprise Managed Users and cannot fork or even open repositories outside their enterprise. The symptom is a bare "Something went wrong!" on the Fork button (verified with an `_lhind` account on 2026-09-22). Then import this repository into the customer's organisation (GitHub "Import repository"), and participants fork it there. `scripts/create-group-repos.sh` remains for the case that you prefer repos from a template instead of forks.
 
 ## Before the workshop
 
