@@ -10,6 +10,11 @@
       "command": "node",
       "args": ["tools/cluster-snapshot-mcp/index.mjs"],
       "env": { "SNAPSHOT_PATH": "${workspaceFolder}/diag/snapshot.json" }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }

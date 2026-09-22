@@ -84,7 +84,7 @@ The `work-ticket` skill reads the issue, branches, plans, stops for your "go", i
 - Skills: `.github/skills/` (`plan-ticket`, `diagnose-pipeline`, `verify-change`)
 - Agents: `.github/agents/` (`reviewer`, `dependency-analyst`)
 - Hooks: `.github/hooks/verify.json` (`postToolUse` runs lint, `sessionStart` injects repo state)
-- MCP: `.vscode/mcp.json` for VS Code, `.mcp.json` for the Copilot CLI. Both start the Playwright MCP without vision and the `cluster-snapshot` MCP.
+- MCP: `.vscode/mcp.json` for VS Code, `.mcp.json` for the Copilot CLI. Both start the Playwright MCP without vision, the `cluster-snapshot` MCP, and Context7 (current library docs, for example Express, Vitest, Playwright; ask "how do I … in Express, use context7").
 
 Copilot CLI: run `copilot` in the repository root; project MCP servers, skills, agents, and hooks are picked up automatically. VS Code: open the folder, accept the MCP servers when prompted.
 
