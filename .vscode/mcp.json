@@ -3,7 +3,7 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--image-responses", "omit"]
+      "args": ["-y", "@playwright/mcp@0.0.82", "--headless", "--isolated", "--image-responses", "omit"]
     },
     "cluster-snapshot": {
       "type": "stdio",
@@ -14,7 +14,7 @@
     "context7": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
     }
   }
 }

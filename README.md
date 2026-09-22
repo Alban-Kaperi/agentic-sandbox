@@ -22,12 +22,12 @@ What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists 
    ```
 3. **Enable Actions in your fork:** open the Actions tab of your fork on GitHub and click "I understand my workflows, go ahead and enable them". Forks start with workflows disabled; without this click the pipeline never runs. Actions are free on public repositories, and forks of a public repository are public.
 4. **Create the tickets as issues in your fork:** `scripts/seed-issues.sh YOUR-LOGIN/agentic-sandbox`. Issues are not copied by forking.
-5. Check: `npm ci && npm run verify && npx playwright install chromium && gh issue view 1 --json title`, then push an empty commit and watch the first pipeline run go green:
+5. Check: `npm ci && npm run verify && npx playwright install chromium && npx -y @playwright/mcp@0.0.82 --version && npx -y @upstash/context7-mcp@4.1.1 --help && gh issue view 1 --json title`, then push an empty commit and watch the first pipeline run go green:
    ```
    git commit --allow-empty -m "pipeline check" && git push && sleep 10 && gh run watch
    ```
    The pause matters: right after the push the new run does not exist yet, and `gh run watch` would offer you an older one.
-   `npx playwright install chromium` downloads the browser the e2e tests need (about 100 MB, once). `gh issue view 1` proves that `gh` talks to your fork and is new enough.
+   `npx playwright install chromium` downloads the browser the e2e tests need (about 100 MB, once). The two `npx -y` calls download the MCP servers once, so the first `/mcp` in Copilot does not time out. `gh issue view 1` proves that `gh` talks to your fork and is new enough.
 
 ## Run it
 
