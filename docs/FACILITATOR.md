@@ -4,31 +4,20 @@
 
 Default: **one repository, every participant forks it.** You maintain one repo, each fork is a private working copy with its own pipeline runs and minutes.
 
-- Make the repository public: `gh repo edit <owner>/agentic-sandbox --visibility public --accept-visibility-change-consequences`. Public means anyone can fork without collaborator management, Actions minutes are unlimited in the forks, and the scoreboard can read them.
+- The repository is public. Public means anyone can fork without collaborator management, Actions are free in the forks (forks of a public repository are public), and the scoreboard can read them.
 - Forks start with Actions disabled; every participant enables them once (README step 3).
-- Issues are not forked. Either Jira is the ticket source (the `work-ticket` skill creates issues in the fork), or participants run `scripts/seed-issues.sh <their fork>`.
+- Issues are not forked. Every participant runs `scripts/seed-issues.sh <their fork>` once; it creates the nine tickets from `docs/tickets/` as issues in the fork.
 - Groups of three can still work together: each person in their own fork on the same ticket, or one fork per group with the others as collaborators.
 
 **Check first:** if the customer's GitHub accounts carry a suffix like `_vw`, they are Enterprise Managed Users and cannot fork or even open repositories outside their enterprise. Then import this repository into the customer's organisation (GitHub "Import repository"), and participants fork it there. `scripts/create-group-repos.sh` remains for the case that you prefer repos from a template instead of forks.
-
-## Jira
-
-The loop can start in Jira and end with a comment there. Set up once:
-
-1. Create a Jira Cloud site (Free plan, up to 10 users) and a project, note the key (for example `WLTP`).
-2. Create an API token for your Atlassian account, then `JIRA_SITE=https://<site>.atlassian.net JIRA_EMAIL=<you> JIRA_TOKEN=<token> JIRA_PROJECT=<KEY> node scripts/seed-jira.mjs` creates the nine tickets.
-3. Participants log in once when the Atlassian MCP asks (OAuth). With the 10-user limit, give each group one Jira account.
-4. Without Jira the same loop runs on GitHub issues alone; the `work-ticket` skill accepts both.
-
-The Atlassian MCP has no read-only mode. Participants can only do what their Jira account can do, so give the accounts comment and transition rights, nothing else.
 
 ## Before the workshop
 
 1. Make the repository public, send the fork link and the README setup steps to the participants a week ahead.
 2. Ask everyone to complete the setup (fork, Actions enabled, first pipeline green) before the day. The scoreboard shows who did.
-3. Decide tickets vs Jira: issues are seeded from `docs/tickets/`. If the team wants Jira, create a Jira Cloud Free site and paste the same tickets; the Atlassian MCP works against it.
-5. Check the Actions minutes budget: private repos in the free plan have 2,000 minutes per month; a full run takes 4 to 6 minutes. Make the repos public or use the customer's organisation if that is tight.
-6. Dry run: work ticket 0 and ticket 5 yourself in a group repo with the Copilot CLI and with VS Code.
+3. Tickets are GitHub issues, seeded from `docs/tickets/` with `scripts/seed-issues.sh`. Edit the files there if you want other tickets.
+4. Actions cost: nothing for public repositories and their forks. Only if the repository is imported into a private organisation do the runs count against that organisation's included minutes (a full run takes 3 to 5 minutes).
+5. Dry run: work ticket 1 and ticket 5 yourself in your own fork with the Copilot CLI and with VS Code.
 
 ## Live scoreboard
 
@@ -66,5 +55,6 @@ Closes all issues, deletes all branches except `main`, resets `main` to the temp
 
 - A multi-session cockpit with status and next-step per session
 - Read-only cluster diagnosis through an MCP server against a real cluster
-- The one-flag demo: `READ_ONLY_MODE=true` on the Atlassian MCP, tool list before and after
+- The one-flag demo: `--read-only` on the GitHub MCP server, tool list before and after
+- Then hand over to the participant who built his own harness: one ticket, the whole loop, live
 - Token flow: `aws sso login`, `credential_process`, the agent never sees a credential

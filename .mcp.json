@@ -10,10 +10,6 @@
       "command": "node",
       "args": ["tools/cluster-snapshot-mcp/index.mjs"],
       "env": { "SNAPSHOT_PATH": "diag/snapshot.json" }
-    },
-    "atlassian": {
-      "type": "http",
-      "url": "https://mcp.atlassian.com/v2/mcp"
     }
   }
 }
