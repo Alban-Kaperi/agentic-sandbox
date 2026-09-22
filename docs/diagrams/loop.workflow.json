@@ -1,0 +1,250 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Ticket to Deploy: every station, and what does the work there",
+    "output": "loop.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "agent",
+      "label": "Agent in Copilot"
+    },
+    {
+      "id": "you",
+      "label": "You, at the gates"
+    },
+    {
+      "id": "github",
+      "label": "GitHub"
+    },
+    {
+      "id": "pipeline",
+      "label": "Pipeline with a kind cluster inside the job"
+    },
+    {
+      "id": "red",
+      "label": "Red deploy",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "brief",
+      "label": "Brief",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "build",
+      "label": "Build",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ship",
+      "label": "Ship",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "issue",
+    "plan",
+    "go",
+    "code",
+    "verify",
+    "pr",
+    "pipeline",
+    "merge"
+  ],
+  "nodes": [
+    {
+      "id": "issue",
+      "lane": "github",
+      "col": 0,
+      "type": "external",
+      "label": "Issue",
+      "sublabel": "gh issue view"
+    },
+    {
+      "id": "plan",
+      "lane": "agent",
+      "col": 1,
+      "type": "backend",
+      "label": "Plan",
+      "sublabel": "plan-ticket skill",
+      "tag": "plans/n.md"
+    },
+    {
+      "id": "go",
+      "lane": "you",
+      "col": 1,
+      "type": "security",
+      "label": "Go",
+      "sublabel": "you read the plan",
+      "tag": "human gate"
+    },
+    {
+      "id": "code",
+      "lane": "agent",
+      "col": 2,
+      "type": "backend",
+      "label": "Code",
+      "sublabel": "hook runs tsc",
+      "tag": "after each edit"
+    },
+    {
+      "id": "verify",
+      "lane": "agent",
+      "col": 3,
+      "type": "backend",
+      "label": "Verify",
+      "sublabel": "verify-change skill",
+      "tag": "tests, browser"
+    },
+    {
+      "id": "pr",
+      "lane": "github",
+      "col": 3,
+      "type": "external",
+      "label": "Pull request",
+      "sublabel": "gh pr create",
+      "tag": "template"
+    },
+    {
+      "id": "review",
+      "lane": "agent",
+      "col": 4,
+      "type": "security",
+      "label": "Review",
+      "sublabel": "reviewer agent"
+    },
+    {
+      "id": "pipeline",
+      "lane": "pipeline",
+      "col": 4,
+      "type": "cloud",
+      "label": "Deploy",
+      "sublabel": "tests, kind, smoke",
+      "tag": "browser check"
+    },
+    {
+      "id": "merge",
+      "lane": "you",
+      "col": 5,
+      "type": "security",
+      "label": "Merge",
+      "sublabel": "a human, always",
+      "tag": "human gate"
+    },
+    {
+      "id": "diagnose",
+      "lane": "red",
+      "col": 5,
+      "type": "security",
+      "label": "Diagnose",
+      "sublabel": "diagnose-pipeline",
+      "tag": "summary, snapshot"
+    }
+  ],
+  "edges": [
+    {
+      "from": "issue",
+      "to": "plan"
+    },
+    {
+      "from": "plan",
+      "to": "go",
+      "label": "plan",
+      "variant": "emphasis"
+    },
+    {
+      "from": "go",
+      "to": "code",
+      "label": "go",
+      "variant": "emphasis"
+    },
+    {
+      "from": "code",
+      "to": "verify"
+    },
+    {
+      "from": "verify",
+      "to": "pr",
+      "label": "push"
+    },
+    {
+      "from": "pr",
+      "to": "review",
+      "label": "diff"
+    },
+    {
+      "from": "pr",
+      "to": "pipeline",
+      "label": "every push",
+      "variant": "emphasis"
+    },
+    {
+      "from": "review",
+      "to": "merge",
+      "label": "findings"
+    },
+    {
+      "from": "pipeline",
+      "to": "merge",
+      "label": "green",
+      "variant": "emphasis"
+    },
+    {
+      "from": "pipeline",
+      "to": "diagnose",
+      "label": "red",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "from": "diagnose",
+      "to": "code",
+      "label": "root cause named, then fix and push",
+      "variant": "dashed",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Two human gates",
+      "items": [
+        "Go: you read the plan before any code exists",
+        "Merge: a person, always, after a green pipeline"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "The agent does the rest",
+      "items": [
+        "Skills for plan, verify and diagnose",
+        "A hook runs tsc after every edit",
+        "A reviewer agent reads the diff, not the PR text"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "When the deploy is red",
+      "items": [
+        "Job summary and cluster snapshot are the evidence",
+        "Name the root cause before changing code",
+        "The work-ticket skill runs the whole row and stops at the gates"
+      ]
+    }
+  ]
+}
