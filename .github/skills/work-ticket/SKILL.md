@@ -1,6 +1,6 @@
 ---
 name: work-ticket
-description: Run the whole loop for one GitHub issue, from reading it to a green pipeline and a closing comment: issue, branch, plan, implement, verify, pull request, pipeline, diagnose and fix, report. Use when asked to "work", "take", or "do" a ticket end to end.
+description: "Run the whole loop for one GitHub issue, from reading it to a green pipeline and a closing comment: issue, branch, plan, implement, verify, pull request, pipeline, diagnose and fix, report. Use when asked to \"work\", \"take\", or \"do\" a ticket end to end."
 argument-hint: "#<issue-number>"
 ---
 

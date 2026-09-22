@@ -1,6 +1,6 @@
 ---
 name: diagnose-pipeline
-description: Find the root cause of a failed pipeline run from the job summary, logs, and the cluster-snapshot artifact before touching code. Use when the ci workflow is red or a deploy step failed.
+description: "Find the root cause of a failed pipeline run from the job summary, logs, and the cluster-snapshot artifact before touching code. Use when the ci workflow is red or a deploy step failed."
 ---
 
 # Diagnose a failed pipeline run

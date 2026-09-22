@@ -1,6 +1,6 @@
 ---
 name: verify-change
-description: Verify a change end to end before opening or updating a pull request: lint, unit tests, build, environment contract, browser check. Use before every PR and after every review round.
+description: "Verify a change end to end before opening or updating a pull request: lint, unit tests, build, environment contract, browser check. Use before every PR and after every review round."
 ---
 
 # Verify a change

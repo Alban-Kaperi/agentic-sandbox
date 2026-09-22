@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Adversarial code reviewer for pull requests in this repository. Reviews the diff without the author's reasoning and reports concrete findings with file and line.
+description: "Adversarial code reviewer for pull requests in this repository. Reviews the diff without the author's reasoning and reports concrete findings with file and line."
 tools: ["read", "search", "terminal"]
 ---
 

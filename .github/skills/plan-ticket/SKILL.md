@@ -1,6 +1,6 @@
 ---
 name: plan-ticket
-description: Turn a ticket into a short, evidence-based implementation plan with dependency analysis before any code is written. Use when starting work on an issue or when asked to plan.
+description: "Turn a ticket into a short, evidence-based implementation plan with dependency analysis before any code is written. Use when starting work on an issue or when asked to plan."
 ---
 
 # Plan a ticket

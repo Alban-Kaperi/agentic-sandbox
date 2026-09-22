@@ -1,6 +1,6 @@
 ---
 name: dependency-analyst
-description: Finds all direct, transitive, and implicit dependencies of a proposed change and reports them as confirmed, plausible, or open with file evidence. Use before implementing a ticket that touches shared code, configuration, or the deployment.
+description: "Finds all direct, transitive, and implicit dependencies of a proposed change and reports them as confirmed, plausible, or open with file evidence. Use before implementing a ticket that touches shared code, configuration, or the deployment."
 tools: ["read", "search"]
 ---
 
