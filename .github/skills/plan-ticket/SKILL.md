@@ -13,7 +13,7 @@ Produce `plans/<issue-number>.md` and nothing else. Do not edit source files whi
 2. Find every place the change touches. Use search across `src/`, `test/`, `e2e/`, `k8s/`, `public/`, and `README.md`. For each hit, record the file path and why it is affected.
 3. Classify each dependency:
    - **confirmed**: you read the code and it is affected (cite path and symbol)
-   - **plausible**: inferred from naming or structure, not read
+   - **plausible**: inferred from naming or structure, not read (cite the path and say how to verify)
    - **open**: could not determine, needs a human answer
 4. Check the environment contract: does the change add or require a variable in `src/config.ts`? Then `k8s/configmap.yaml` and the README table are in scope.
 5. List the tests you will add or change, by file.
@@ -26,7 +26,7 @@ Produce `plans/<issue-number>.md` and nothing else. Do not edit source files whi
 # Plan for #<n>: <title>
 
 ## Goal
-## Files to change (confirmed / plausible / open)
+## Dependencies (confirmed / plausible / open), each with change: yes | no
 ## Tests
 ## Environment contract
 ## Risks

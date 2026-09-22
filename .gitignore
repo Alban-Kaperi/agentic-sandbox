@@ -4,6 +4,7 @@ coverage/
 test-results/
 playwright-report/
 snapshot.json
+diag/
 .env
 .DS_Store
 scoreboard/

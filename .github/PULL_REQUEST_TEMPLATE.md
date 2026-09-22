@@ -11,6 +11,7 @@ Link to `plans/<issue>.md`. Deviations from the plan and why:
 - verify (lint, unit, build): pass | fail
 - env contract (`src/config.ts` vs `k8s/configmap.yaml`): ok | gap
 - browser check: pass | fail | not applicable
+- pipeline (run id): green | red | pending
 - not checked:
 
 ## Assumptions and risks

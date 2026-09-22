@@ -19,8 +19,8 @@ jobs:
     name: lint, unit tests, build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -34,8 +34,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -91,7 +91,7 @@ jobs:
         run: |
           kubectl port-forward service/sandbox-app 3000:80 >/tmp/pf.log 2>&1 &
           for i in $(seq 1 20); do
-            if curl -fsS http://localhost:3000/health >/tmp/health.json; then break; fi
+            if curl -fsS http://localhost:3000/health >/tmp/health.json 2>/dev/null; then break; fi
             sleep 1
           done
           echo "health: $(cat /tmp/health.json)"
@@ -142,7 +142,7 @@ jobs:
             echo '```'
             for f in diag/logs-*.txt; do
               [ -s "$f" ] || continue
-              grep -q 'unable to retrieve container logs' "$f" && continue
+              grep -qE 'unable to retrieve container logs|previous terminated container' "$f" && continue
               echo "## $(basename "$f" .txt)"
               echo '```'
               tail -n 60 "$f"
@@ -152,7 +152,7 @@ jobs:
 
       - name: Upload cluster snapshot
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cluster-snapshot
           path: diag/
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload Playwright report
         if: always() && steps.e2e.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
@@ -170,5 +170,16 @@ jobs:
         if: steps.rollout.outcome != 'success' || steps.stability.outcome != 'success' || steps.smoke.outcome != 'success' || steps.e2e.outcome != 'success'
         run: |
           echo "outcomes: rollout=${{ steps.rollout.outcome }} stability=${{ steps.stability.outcome }} smoke=${{ steps.smoke.outcome }} browser=${{ steps.e2e.outcome }}"
-          echo "Read the job summary and the cluster-snapshot artifact for pod logs and events."
+          echo "The steps above keep a green tick because the job continues to collect diagnostics; the outcomes line is the verdict."
+          echo "The cluster-snapshot artifact holds the same evidence as text and JSON."
+          echo; echo "## pods"; cat diag/pods.txt
+          echo; echo "## events (last 30)"; tail -n 30 diag/events.txt
+          for f in diag/logs-*.txt; do
+            [ -s "$f" ] || continue
+            grep -qE 'unable to retrieve container logs|previous terminated container' "$f" && continue
+            echo; echo "## $(basename "$f" .txt)"; tail -n 40 "$f"
+          done
+          if [ "${{ steps.e2e.outcome }}" = "failure" ]; then
+            echo; echo "## browser check failed: see the playwright-report artifact; a 'strict mode violation' names the colliding elements above in this job's log"
+          fi
           exit 1

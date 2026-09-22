@@ -6,7 +6,7 @@ It exists for one purpose: practising an agentic workflow end to end. Ticket, pl
 
 ## What you need on your machine
 
-- git, Node 22 or newer, and the `gh` CLI
+- git, Node 22 or newer, and the `gh` CLI **2.63 or newer** (`gh --version`; older versions fail on `gh issue view` with a GraphQL error about Projects classic)
 - GitHub Copilot: the Copilot CLI, VS Code, or the Copilot App
 
 What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists only inside the pipeline run on GitHub's runners. You push, the pipeline deploys, you read the result.
@@ -22,19 +22,33 @@ What you do **not** need: Docker, Kubernetes, kubectl, kind. The cluster exists 
    ```
 3. **Enable Actions in your fork:** open the Actions tab of your fork on GitHub and click "I understand my workflows, go ahead and enable them". Forks start with workflows disabled; without this click the pipeline never runs. Actions are free on public repositories, and forks of a public repository are public.
 4. **Create the tickets as issues in your fork:** `scripts/seed-issues.sh YOUR-LOGIN/agentic-sandbox`. Issues are not copied by forking.
-5. Check: `npm ci && npm run verify`, then push an empty commit and watch the first pipeline run go green:
+5. Check: `npm ci && npm run verify && npx playwright install chromium && gh issue view 1 --json title`, then push an empty commit and watch the first pipeline run go green:
    ```
    git commit --allow-empty -m "pipeline check" && git push
    gh run watch
    ```
+   `npx playwright install chromium` downloads the browser the e2e tests need (about 100 MB, once). `gh issue view 1` proves that `gh` talks to your fork and is new enough.
 
 ## Run it
 
 ```
 npm run dev          # http://localhost:3000
-npm run verify       # lint, unit tests, build
-npm run e2e          # browser tests, server must be running
+npm run verify       # lint (tsc on src/), unit tests, build
+npm run e2e          # browser tests, server must be running, browser installed (npx playwright install chromium)
 ```
+
+`npm run lint` type-checks `src/` only. Tests, browser specs, manifests and the page are checked by `npm test`, `npm run e2e` and the pipeline, not by tsc.
+
+## API
+
+| Method and path | Answers | Errors |
+|---|---|---|
+| `GET /health` | `{ status, version, region }` | |
+| `GET /api/runs` | all runs; `?vehicleId=` filters | |
+| `GET /api/runs/:id` | one run | 404 `{ error: "run not found", id }` |
+| `POST /api/runs` | 201 with the created run | 400 `{ error, details: string[] }` |
+
+Errors are JSON with an `error` field. Validation errors add `details`; other errors may add context fields such as `id`.
 
 ## Environment contract
 
@@ -57,9 +71,12 @@ Every variable the app reads is declared in `src/config.ts` and provided by `k8s
 
 Where to look when it is red:
 
-- The **job summary** (Actions run page, top) shows the outcome of rollout, stability, smoke, and browser plus pods, events, and logs.
-- The **`cluster-snapshot` artifact** contains everything as text plus `snapshot.json`. Download with `gh run download <run-id> -n cluster-snapshot -D diag/`.
-- The **`playwright-report` artifact** has the failing step and a screenshot when the browser check failed.
+- The **job summary** (Actions run page in the browser, top) shows the outcome of rollout, stability, smoke, and browser plus pods, events, and logs. It is not reachable from the CLI.
+- From the CLI: `gh run view <run-id> --log-failed` prints the same evidence (outcomes, pods, events, logs) under the red gate step. The rollout, stability, smoke and browser steps themselves show a green tick even when they failed, because the job continues past them to collect diagnostics.
+- The **`cluster-snapshot` artifact** contains everything as text plus `snapshot.json`. Download with `gh run download <run-id> -n cluster-snapshot -D diag/` (`diag/` is ignored by git).
+- The **`playwright-report` artifact** has the failing step and a screenshot when the browser check failed. A `strict mode violation` in the browser log means a new element matches a locator an existing spec uses; the fix is in the page, not in the test.
+
+A run takes about two minutes, red or green. Stay on it.
 
 ## The whole loop in one command
 
@@ -73,7 +90,7 @@ The `work-ticket` skill reads the issue, branches, plans, stops for your "go", i
 
 1. Pick an issue. Either assign it to Copilot (cloud agent) or start a session locally.
 2. Plan first: ask for the `plan-ticket` skill. The result lands in `plans/<issue>.md`. Read it. Answer the open questions.
-3. Implement. The `after-edit` hook runs `tsc` after each file edit and reports back.
+3. Implement. The `after-edit` hook runs `tsc` after each file edit and reports back. It sees `src/` only; a manifest, page or test edit always passes it.
 4. Verify: ask for the `verify-change` skill. Then open the PR with the template.
 5. Review: ask the `reviewer` agent for a second opinion. It reviews without your reasoning.
 6. Pipeline red? Ask for the `diagnose-pipeline` skill before touching code.
@@ -81,7 +98,7 @@ The `work-ticket` skill reads the issue, branches, plans, stops for your "go", i
 ## Agent setup
 
 - Instructions: `AGENTS.md` (canonical), `.github/copilot-instructions.md` (points there), `.github/instructions/*.instructions.md` (path-scoped)
-- Skills: `.github/skills/` (`plan-ticket`, `diagnose-pipeline`, `verify-change`)
+- Skills: `.github/skills/` (`work-ticket`, `plan-ticket`, `verify-change`, `diagnose-pipeline`)
 - Agents: `.github/agents/` (`reviewer`, `dependency-analyst`)
 - Hooks: `.github/hooks/verify.json` (`postToolUse` runs lint, `sessionStart` injects repo state)
 - MCP: `.vscode/mcp.json` for VS Code, `.mcp.json` for the Copilot CLI. Both start the Playwright MCP without vision, the `cluster-snapshot` MCP, and Context7 (current library docs, for example Express, Vitest, Playwright; ask "how do I … in Express, use context7").
