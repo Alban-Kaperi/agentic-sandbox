@@ -36,7 +36,9 @@ The Atlassian MCP has no read-only mode. Participants can only do what their Jir
 while true; do node scripts/scoreboard.mjs <owner>/agentic-sandbox; sleep 60; done
 open scoreboard/index.html     # share this browser tab; it refreshes itself every 60 s
 ```
-One row per fork, one column per ticket (open, PR open, done, matched by issue title) plus the last pipeline result in that fork. Needs the forks to be readable by your token, which public forks are.
+The page is a room dashboard. At the top you type the rooms once (`Room 1: alice, bob, carol`, one per line, GitHub logins or fork URLs), the current tickets (`2,3`) and the deadline (`11:00`); all three stay in the browser. Each room shows its forks, one column per ticket (yellow = current), the last pipeline result, and a status: **ready** when every current ticket has a PR or is closed in one of its forks, otherwise **working**. The countdown runs live; the data refreshes every 60 s from the loop. Needs the forks to be readable by your token, which public forks are.
+
+Timer rule: the deadline decides, not the last room. Teams breakout rooms get the same duration; they close automatically. Rooms that finish early take the stretch goal on the task card (ticket #9, the work-ticket skill on #8, or reviewing another room's PR).
 
 ## During the day
 
