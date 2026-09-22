@@ -18,7 +18,8 @@ Produce `plans/<issue-number>.md` and nothing else. Do not edit source files whi
 4. Check the environment contract: does the change add or require a variable in `src/config.ts`? Then `k8s/configmap.yaml` and the README table are in scope.
 5. List the tests you will add or change, by file.
 6. List risks and what could break, including the pipeline steps that could fail (unit, rollout, stability, smoke, browser).
-7. Write open questions as a numbered list. If any question blocks the implementation, stop after the plan and ask.
+7. Write open questions as a numbered list in the plan. Then post the same numbered list in the chat and ask the user to answer them. Stop there and wait. Do not implement.
+8. When the user has answered, add the answers to the plan under `## Decisions` and say that the plan is ready to implement. If there were no open questions, say so.
 
 ## Output format
 
@@ -31,6 +32,7 @@ Produce `plans/<issue-number>.md` and nothing else. Do not edit source files whi
 ## Environment contract
 ## Risks
 ## Open questions
+## Decisions
 ```
 
 Keep it under 60 lines. The plan is reviewed before implementation starts.
