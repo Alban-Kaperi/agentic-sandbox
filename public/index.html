@@ -25,7 +25,7 @@
       <option value="NEDC">NEDC</option>
       <option value="RDE">RDE</option>
     </select>
-    <input id="co2" name="co2GramsPerKm" type="number" step="0.1" placeholder="CO2 g/km" required>
+    <input id="co2" name="co2GramsPerKm" type="number" step="0.1" min="0" max="500" placeholder="CO2 g/km" required>
     <button type="submit">Add run</button>
   </form>
   <p id="status" class="status" role="status"></p>
@@ -43,10 +43,17 @@
   }
   document.getElementById("new-run").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const co2Input = document.getElementById("co2");
+    const co2Value = Number(co2Input.value);
+    if (!Number.isFinite(co2Value) || co2Value < 0 || co2Value > 500) {
+      status.textContent = "Error: co2GramsPerKm must be between 0 and 500";
+      co2Input.focus();
+      return;
+    }
     const body = {
       vehicleId: document.getElementById("vehicleId").value,
       cycle: document.getElementById("cycle").value,
-      co2GramsPerKm: Number(document.getElementById("co2").value)
+      co2GramsPerKm: co2Value
     };
     const res = await fetch("/api/runs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const data = await res.json();

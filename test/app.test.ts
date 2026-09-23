@@ -64,4 +64,32 @@ describe("runs api", () => {
     expect(res.status).toBe(400);
     expect(res.body.details).toHaveLength(3);
   });
+
+  it("rejects CO2 values below 0", async () => {
+    const res = await request(app)
+      .post("/api/runs")
+      .send({ vehicleId: "WVW-7777", cycle: "WLTC", co2GramsPerKm: -0.1 });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toContain("co2GramsPerKm must be between 0 and 500");
+  });
+
+  it("rejects CO2 values above 500", async () => {
+    const res = await request(app)
+      .post("/api/runs")
+      .send({ vehicleId: "WVW-7777", cycle: "WLTC", co2GramsPerKm: 500.1 });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toContain("co2GramsPerKm must be between 0 and 500");
+  });
+
+  it("accepts CO2 boundary values", async () => {
+    const below = await request(app)
+      .post("/api/runs")
+      .send({ vehicleId: "WVW-0001", cycle: "WLTC", co2GramsPerKm: 0 });
+    const above = await request(app)
+      .post("/api/runs")
+      .send({ vehicleId: "WVW-0002", cycle: "RDE", co2GramsPerKm: 500 });
+
+    expect(below.status).toBe(201);
+    expect(above.status).toBe(201);
+  });
 });
