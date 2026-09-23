@@ -50,6 +50,34 @@ describe("runs api", () => {
     expect(res.status).toBe(404);
   });
 
+  it("updates run status through the allowed transitions", async () => {
+    const running = await request(app).patch("/api/runs/run-0001/status").send({ status: "running" });
+    expect(running.status).toBe(200);
+    expect(running.body.status).toBe("running");
+
+    const done = await request(app).patch("/api/runs/run-0001/status").send({ status: "done" });
+    expect(done.status).toBe(200);
+    expect(done.body.status).toBe("done");
+  });
+
+  it("rejects an invalid status transition", async () => {
+    const res = await request(app).patch("/api/runs/run-0001/status").send({ status: "done" });
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({ error: "invalid transition", from: "planned", to: "done" });
+  });
+
+  it("includes a null target for a missing status", async () => {
+    const res = await request(app).patch("/api/runs/run-0001/status").send({});
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({ error: "invalid transition", from: "planned", to: null });
+  });
+
+  it("returns 404 for an unknown status transition run", async () => {
+    const res = await request(app).patch("/api/runs/run-9999/status").send({ status: "running" });
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "run not found", id: "run-9999" });
+  });
+
   it("creates a run", async () => {
     const res = await request(app)
       .post("/api/runs")

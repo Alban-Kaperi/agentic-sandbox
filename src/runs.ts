@@ -63,6 +63,13 @@ export class RunStore {
     return this.runs.get(id);
   }
 
+  updateStatus(id: string, status: RunStatus): MeasurementRun | undefined {
+    const run = this.runs.get(id);
+    if (!run) return undefined;
+    run.status = status;
+    return run;
+  }
+
   create(input: NewRun): MeasurementRun {
     this.seq += 1;
     const run: MeasurementRun = {
