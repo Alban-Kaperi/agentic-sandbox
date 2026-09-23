@@ -63,6 +63,13 @@ export class RunStore {
     return this.runs.get(id);
   }
 
+  delete(id: string): MeasurementRun | undefined {
+    const run = this.runs.get(id);
+    if (!run) return undefined;
+    this.runs.delete(id);
+    return run;
+  }
+
   create(input: NewRun): MeasurementRun {
     this.seq += 1;
     const run: MeasurementRun = {
