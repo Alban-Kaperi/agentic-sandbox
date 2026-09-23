@@ -20,3 +20,21 @@ test("user can add a run through the UI", async ({ page }) => {
   await expect(page.locator("tbody#runs tr")).toHaveCount(rowsBefore + 1);
   await expect(page.locator("tbody#runs")).toContainText("WVW-E2E1");
 });
+
+test("user can filter runs by vehicle", async ({ page }) => {
+  await page.goto("/");
+  const filter = page.getByLabel("Filter by vehicle");
+  await filter.fill("WVW-1001");
+
+  const rows = page.locator("tbody#runs tr");
+  await expect(rows).toHaveCount(2);
+  await expect(rows).toContainText(["WVW-1001", "WVW-1001"]);
+  await expect(page.locator("tbody#runs")).not.toContainText("WVW-2042");
+
+  await page.getByPlaceholder("Vehicle ID").fill("WVW-FILTERED");
+  await page.getByPlaceholder("CO2 g/km").fill("123.4");
+  await page.getByRole("button", { name: "Add run" }).click();
+  await expect(page.getByRole("status")).toContainText("Created run-");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator("tbody#runs")).not.toContainText("WVW-FILTERED");
+});
