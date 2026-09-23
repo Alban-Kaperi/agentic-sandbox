@@ -33,6 +33,22 @@ export function createApp({ config, store }: AppContext): Express {
     return res.json(run);
   });
 
+  app.patch("/api/runs/:id/status", (req, res) => {
+    const run = store.get(req.params.id);
+    if (!run) return res.status(404).json({ error: "run not found", id: req.params.id });
+
+    const requestedStatus = req.body?.status;
+    const to = typeof requestedStatus === "string" ? requestedStatus : null;
+    if (run.status === "planned" && to === "running") {
+      return res.json(store.updateStatus(req.params.id, "running"));
+    }
+    if (run.status === "running" && to === "done") {
+      return res.json(store.updateStatus(req.params.id, "done"));
+    }
+
+    return res.status(409).json({ error: "invalid transition", from: run.status, to });
+  });
+
   app.post("/api/runs", (req, res) => {
     const input = validateNewRun(req.body);
     const run = store.create(input);
